@@ -1,6 +1,6 @@
 # Star Wars Movies
 
-My project essentially creates a database that models data based around the Star Wars theatrical films and analyzes it based on various criteria. Nothing too special. Decided to do something simple, yet also something I am passionate about.
+I simply created a database for every theatrical Star Wars film to date, along with their respective directors and producers.
 
 
 
@@ -8,50 +8,42 @@ My project essentially creates a database that models data based around the Star
 
 
 
-## A Query I thought it did well on
+## A Question that Worked:
 
-**Question**: Which users rented equipment for more than 3 days and which resorts did they visit and what was the total cost of their trip including equipment and lift ticket?
+**Question**: Which producer doesn't have a known birthdate?
 
-**GPT SQL Response**:
+**ChatGPT SQL Response**:
 ```sql
-SELECT
-    u.user_id,
-    u.first_name,
-    u.last_name,
-    r.name AS resort_name,
-    SUM(COALESCE(rental.cost, 0)) + SUM(COALESCE(t.price, 0)) AS total_cost
-FROM ikon_users u
-JOIN ikon_rentals rental ON u.user_id = rental.user_id
-JOIN ikon_lift_tickets t ON u.user_id = t.user_id
-JOIN ikon_resorts r ON t.resort_id = r.resort_id
-WHERE julianday(rental.return_date) - julianday(rental.rental_date) > 3
-GROUP BY u.user_id, r.resort_id;
+
+SELECT name
+FROM producer
+WHERE birth_date IS NULL;
+
 ```
+**Raw Response**: [('Catherine Winder',)]
 
-**Friendly Response**: Sure! Here are the users who rented equipment for more than 3 days:
-
-1. Laura Stevenson - Aspen Snowmass: $320.00
-2. Bob Jones - Whistler Blackcomb: $330.00
+**Friendly Response**: Catherine Winder doesn't have a known birthdate.
 
 
 
 
-## Question that it tripped up on
+## A Question that DIDN'T Work:
 The zero shot method produced the wrong result. The SQL was incomplete and gave me the answer of none when there is at least one user each that rented equipment and skis either a blue or black.
 
 
 
-Question: What is the ratio of people who rent equipment and ski double black vs those who ski blue? 
+**Question**: Which Star Wars movie had the lowest IMDB score? 
 
-**GPT SQL Response**:
+**ChatGPT SQL Response**:
 
 ```sql
-SELECT 
-    SUM(CASE WHEN r.equipment_type = 'Ski' AND t.difficulty = 'Double Black' THEN 1 ELSE 0 END) * 1.0 
-    NULLIF(SUM(CASE WHEN r.equipment_type = 'Ski' AND t.difficulty = 'Blue' THEN 1 ELSE 0 END), 0) AS ratio\n
-FROM ikon_rentals r
-JOIN ikon_users u ON r.user_id = u.user_id
-JOIN ikon_trails t ON u.skill_level = t.difficulty;
+"SELECT m.name
+FROM movie m
+JOIN producer p ON m.producer_id = p.producer_id
+WHERE p.name = 'Kathleen Kennedy' AND m.name LIKE '%Star Wars%'
+ORDER BY m.imdb_score ASC
+LIMIT 1;"
+
 ```
 
 **Friendly response**: It looks like there are no records for people who rented equipment and skied double black trails or blue trails. Therefore, the ratio cannot be determined at this time.
