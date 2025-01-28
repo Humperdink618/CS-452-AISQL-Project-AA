@@ -1,0 +1,62 @@
+{
+  "strategy": "zero_shot",
+  "prompt_prefix": "create table movie (\n    movie_id integer primary key,\n    name varchar(50) not null,\n    release_date date not null,\n    rating varchar(6) not null,\n    director_id integer not null,\n    producer_id integer not null,\n    box_office float not null,\n    budget float not null,\n    imdb_score float not null,\n    foreign key (director_id) references director (director_id),\n    foreign key (producer_id) references producer (producer_id)\n);\n\ncreate table director (\n    director_id integer primary key,\n    name varchar(50),\n    birth_date date\n);\n\ncreate table producer (\n    producer_id integer primary key,\n    name varchar(50),\n    birth_date date\n); Give me a sqlite select statement that answers the question. Only respond with sqlite syntax. If there is an error do not expalin it!",
+  "questionResults": [
+    {
+      "question": "Which Star Wars movie had the highest box office?",
+      "sql": "\nSELECT movie.name\nFROM movie\nWHERE name LIKE '%Star Wars%' \nORDER BY box_office DESC \nLIMIT 1;\n",
+      "queryRawResponse": "[('Star Wars The Force Awakens',)]",
+      "friendlyResponse": "\"Star Wars: The Force Awakens\" had the highest box office.",
+      "error": "None"
+    },
+    {
+      "question": "Which Star Wars movie made the most money (box office - budget)?",
+      "sql": "\nSELECT name\nFROM movie\nWHERE name LIKE '%Star Wars%'\nORDER BY (box_office - budget) DESC\nLIMIT 1;\n",
+      "queryRawResponse": "[('Star Wars The Force Awakens',)]",
+      "friendlyResponse": "\"The Force Awakens\" made the most money.",
+      "error": "None"
+    },
+    {
+      "question": "Which director made the most Star Wars movies?",
+      "sql": "\nSELECT d.name, COUNT(m.movie_id) AS star_wars_movie_count\nFROM movie m\nJOIN director d ON m.director_id = d.director_id\nWHERE m.name LIKE 'Star Wars%'\nGROUP BY d.director_id\nORDER BY star_wars_movie_count DESC\nLIMIT 1;\n",
+      "queryRawResponse": "[('George Lucas', 4)]",
+      "friendlyResponse": "George Lucas directed the most Star Wars movies, with a total of four.",
+      "error": "None"
+    },
+    {
+      "question": "What are the top 3 IMDB scores represented?",
+      "sql": "\nSELECT DISTINCT imdb_score\nFROM movie\nORDER BY imdb_score DESC\nLIMIT 3;\n",
+      "queryRawResponse": "[(8.7,), (8.6,), (8.3,)]",
+      "friendlyResponse": "The top 3 IMDb scores are 8.7, 8.6, and 8.3.",
+      "error": "None"
+    },
+    {
+      "question": "What are the names and birthdates of the directors who have worked on a movie produced by Kathleen Kennedy?",
+      "sql": "\nSELECT d.name, d.birth_date\nFROM director d\nJOIN movie m ON d.director_id = m.director_id\nJOIN producer p ON m.producer_id = p.producer_id\nWHERE p.name = 'Kathleen Kennedy';\n",
+      "queryRawResponse": "[('J.J. Abrams', '1966-06-27'), ('Rian Johnson', '1973-12-17'), ('J.J. Abrams', '1966-06-27'), ('Gareth Edwards', '1975-07-13'), ('Ron Howard', '1954-03-01')]",
+      "friendlyResponse": "Here are some directors and their birthdates who have worked on movies produced by Kathleen Kennedy: J.J. Abrams (June 27, 1966), Rian Johnson (December 17, 1973), Gareth Edwards (July 13, 1975), and Ron Howard (March 1, 1954).",
+      "error": "None"
+    },
+    {
+      "question": "Who has more than one director credit on a Star Wars movie?",
+      "sql": "\nSELECT d.name\nFROM director d\nJOIN movie m ON d.director_id = m.director_id\nWHERE m.name LIKE '%Star Wars%'\nGROUP BY d.name\nHAVING COUNT(DISTINCT m.movie_id) > 1;\n",
+      "queryRawResponse": "[('George Lucas',), ('J.J. Abrams',)]",
+      "friendlyResponse": "George Lucas and J.J. Abrams both have more than one director credit on Star Wars movies.",
+      "error": "None"
+    },
+    {
+      "question": "Which producer doesn't have a known birthdate?",
+      "sql": "\nSELECT name FROM producer WHERE birth_date IS NULL;\n",
+      "queryRawResponse": "[('Catherine Winder',)]",
+      "friendlyResponse": "Catherine Winder doesn't have a known birthdate.",
+      "error": "None"
+    },
+    {
+      "question": "Which Star Wars movie had the lowest IMDB score?",
+      "sql": "\nSELECT name FROM movie WHERE name LIKE '%Star Wars%' ORDER BY imdb_score LIMIT 1;\n",
+      "queryRawResponse": "[('Star Wars The Clone Wars',)]",
+      "friendlyResponse": "\"Star Wars: The Clone Wars\" has the lowest IMDb score among the Star Wars movies.",
+      "error": "None"
+    }
+  ]
+}
