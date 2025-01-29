@@ -14,6 +14,9 @@ def getPath(fname):
 sqliteDbPath = getPath("aidb.sqlite")
 setupSqlPath = getPath("setup.sql")
 setupSqlDataPath = getPath("setupData.sql")
+defaultSetupSqlPath = getPath("defaultSetup.sql")
+defaultSetupDataPath = getPath("defaultSetupData.sql")
+defaultChatGPTResponse = getPath("default_single_domain.json")
 
 # Erase previous db
 if os.path.exists(sqliteDbPath):
@@ -65,9 +68,10 @@ commonSqlOnlyRequest = " Give me a sqlite select statement that answers the ques
 strategies = {
     "zero_shot": setupSqlScript + commonSqlOnlyRequest,
     "single_domain_double_shot": (setupSqlScript + 
-                   " Who doesn't have a known birthdate? " +
-                   " \nSELECT p.producer_id, p.name\nFROM producer p\nWHERE p.birth_date IS NULL;\n " +
-                   commonSqlOnlyRequest)
+                   " What are the names and birthdates of the directors who have worked on a movie produced by Kathleen Kennedy? " +
+                   " \nSELECT DISTINCT d.name, d.birth_date\nFROM director d\nJOIN movie m ON d.director_id = m.director_id\nJOIN producer p ON m.producer_id = p.producer_id\nWHERE p.name = 'Kathleen Kennedy';\n " +
+                   commonSqlOnlyRequest),
+    "cross_domain":(setupSqlScript + setupSQlDataScript + defaultChatGPTResponse + commonSqlOnlyRequest)
 }
 
 questions = [
@@ -77,7 +81,7 @@ questions = [
     "What are the top 3 IMDB scores represented?",
     "What are the names and birthdates of the directors who have worked on a movie produced by Kathleen Kennedy?",
     "Who has more than one director credit on a Star Wars movie?",
-    "Who doesn't have a known birthdate?",
+    "Which producer doesn't have a known birthdate?",
     "Which Star Wars movie had the lowest IMDB score?"
     # "I need insert sql into my tables can you provide good unique data?"
 ]
