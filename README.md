@@ -4,7 +4,7 @@ I simply created a database for every theatrical Star Wars film to date, along w
 
 
 
-<img src="Natural_Language_Proj_Schema_AA">
+<img src="Natural_Language_Proj_Schema_AA.jpg">
 
 
 
